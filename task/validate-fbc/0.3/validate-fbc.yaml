@@ -559,27 +559,31 @@ spec:
           fi
           ERROR_OUTPUT=$(make_result_json -r FAILURE -f $failure_num -s $((check_num - failure_num)) -t "$note")
           echo -n "${ERROR_OUTPUT}" | tee "$(results.TEST_OUTPUT.path)"
-        else
-          note="Task validate-fbc completed: Check result for task result."
-          TEST_OUTPUT=$(make_result_json -r SUCCESS -s $check_num -t "$note")
-          echo -n "${TEST_OUTPUT}" | tee "$(results.TEST_OUTPUT.path)"
         fi
         popd
+      volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /extracted_base_img
+          name: extracted-base-img
     - name: check-related-images-mediatype
-      image: quay.io/konflux-ci/operator-foundry:0.1@sha256:5386d59a2320e88fc41f89365c9ad280b268292d1ac7e4fb9ab2586f32544d08
+      image: quay.io/konflux-ci/operator-foundry:0.1@sha256:3d7c066a0bd46421b2e3dced9d9c7d5ce3891ea5bf88ccbfe19770c3413f9146
       computeResources:
         limits:
           memory: 1Gi
         requests:
           cpu: 100m
           memory: 1Gi
+      env:
+        - name: HOME
+          value: /tmp
       script: |
         #!/usr/bin/env bash
         set -euo pipefail
 
         if [[ -s $(results.TEST_OUTPUT.path) ]]; then
           echo "Test failed in previous step. Bailing."
-          echo "For details, check Tekton task result TEST_OUTPUT in the inspect-image step."
+          echo "For details, check Tekton task result TEST_OUTPUT in the extract-and-validate step."
           exit 0
         fi
 
@@ -610,8 +614,6 @@ spec:
       volumeMounts:
         - mountPath: /tmp
           name: tmp
-        - mountPath: /extracted_base_img
-          name: extracted-base-img
     - name: save-related-images
       computeResources:
         limits:
