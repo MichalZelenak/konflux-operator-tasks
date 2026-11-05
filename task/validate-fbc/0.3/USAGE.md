@@ -45,6 +45,12 @@ To validate that bundle images originate from trusted sources, all `olm.bundle` 
 ### OCI mediaType compatibility
 For OCP versions below 4.21, related images must use Docker V2 manifest media types rather than OCI media types, since older OCP versions do not support OCI natively. This check inspects the manifest mediaType of each related image and fails if any use OCI-only types on an incompatible OCP version. The check is skipped for OCP > 4.20.
 
+`check-related-images-mediatype` owns the final `TEST_OUTPUT` result (unless an
+earlier step already wrote a failure). If `operator-foundry` exits successfully
+without writing `--output`, or prerequisites are missing, or the CLI fails
+unexpectedly, the step writes `ERROR` so the task never finishes with an empty
+`TEST_OUTPUT`.
+
 ## Data output
 ### Related images
 

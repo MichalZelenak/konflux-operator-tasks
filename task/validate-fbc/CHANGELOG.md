@@ -16,12 +16,22 @@
 
 ### Fixed
 
+- `check-related-images-mediatype` always writes `TEST_OUTPUT` before exiting:
+  missing prerequisites, unexpected CLI failures, and empty `--output` all
+  emit `ERROR`.
+- `check-related-images-mediatype` runs without `runAsUser: 0`. It uses a
+  step-local `HOME`/`DOCKER_CONFIG` under the shared `/tmp` emptyDir so Tekton
+  cred-init can write pull secrets without colliding with root-owned
+  `/tmp/.docker` from earlier steps.
 - Migration script for `fbc-inject-lifecycle-oci-ta` now resolves the task bundle
   digest dynamically at migration time instead of using a hardcoded pin, preventing
   digest-mismatch errors for teams that had not yet merged the MintMaker PR for `0.2`.
 
 ### Changed
 
+- `extract-and-validate` no longer writes a final `SUCCESS` `TEST_OUTPUT` on the
+  happy path. That step still writes `FAILURE`/`ERROR` when its own checks fail.
+  On success, final `TEST_OUTPUT` is written by `check-related-images-mediatype`.
 - Migration script now uses `yq` instead of `sed` for all pipeline YAML edits,
   for cross-platform compatibility (macOS + Linux) and safer, structure-aware
   modifications (e.g. distinguishing actual task objects from string matches
